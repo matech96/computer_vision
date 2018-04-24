@@ -21,7 +21,8 @@ def cv_show_pics(plot_column_size, plot_row_size, imgs, **kargs):
     show_pics(plot_column_size, plot_row_size, cv_imgs, **kargs)
 
 
-def draw_box(pts, frame, draw_center=False, color=(255, 0, 0)):
+def draw_box_homogeneous(pts, frame, draw_center=False, color=(255, 0, 0)):
+    pts = np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in pts])
     res = draw_poly_lines(color, frame, pts)
     if draw_center:
         center = np.mean(pts, axis=0)
@@ -34,6 +35,13 @@ def draw_box(pts, frame, draw_center=False, color=(255, 0, 0)):
 def draw_poly_lines(color, frame, pts):
     pts = pts.reshape((-1, 1, 2))
     res = cv.polylines(frame, [pts], True, color, thickness=5)
+    return res
+
+
+def draw_points(pts, frame, color=(0, 255, 255)):
+    res = frame
+    for p in pts:
+        res = cv.circle(res, (int(p[0]), int(p[1])), 5, color)
     return res
 
 
@@ -50,7 +58,7 @@ def resize_greatest_ax(img, s):
     return cv.resize(img, (int(nx), int(ny)))
 
 
-def feature_match(img, resize=True, mask=None):
+def extract_features(img, resize=True, mask=None):
     if resize:
         img = resize_greatest_ax(img, 512)
 
@@ -75,12 +83,17 @@ def match_features(f1, f2):
 
 
 def find_homography(pts1, pts2, matches):
-    m_pts1 = np.float32([pts1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-    m_pts2 = np.float32([pts2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+    m_pts1, m_pts2 = match_points(matches, pts1, pts2)
     h, _ = cv.findHomography(m_pts1, m_pts2, cv.RANSAC, 5.0)
     return h
 
 
+def match_points(matches, pts1, pts2):
+    m_pts1 = np.array([pts1[m.queryIdx] for m in matches])
+    m_pts2 = np.array([pts2[m.trainIdx] for m in matches])
+    return m_pts1, m_pts2
+
+
 def transform_with_homography(h, pts):
-    t_c = h.dot(pts.T)
-    return np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in t_c.T])
+    pts = h.dot(pts.T).T
+    return np.array([[int(c[0] / c[2]), int(c[1] / c[2]), 1] for c in pts])
