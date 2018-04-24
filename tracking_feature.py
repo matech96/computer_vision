@@ -38,26 +38,21 @@ while True:
         _, pts, feat = mu.feature_match(frame, False)
         matches = mu.match_features(org_feat, feat)
         if len(matches) > MIN_MATCH_COUNT:
-            m_pts = np.float32([pts[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
-            org_m_pts = np.float32([org_pts[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
-            H, mask = cv.findHomography(org_m_pts, m_pts, cv.RANSAC, 5.0)
-            matchesMask = mask.ravel().tolist()
-            t_c = H.dot(corner_points.T)
-            cs = np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in t_c.T])
-            mask[:, :] = 0
+            h = mu.find_homography(org_pts, pts, matches)
+            cs = mu.transform_with_homography(h, corner_points)
+            # mask[:, :] = 0
             #             ptsa = cs.reshape((-1,1,2))
-            mask = cv.fillPoly(mask, [cs], 1)
+            # mask = cv.fillPoly(mask, [cs], 1)
             # org_feat = feat
             # org_pts = pts
             res, center = mu.draw_box(cs, frame, True)
-            speed = center - prev_center
+            # speed = center - prev_center
             #             cv_show_pics(frame)
             #             print(cs)
             out.write(res)
-            prev_center = center
+            # prev_center = center
         else:
             print("Not enough matches are found - {}/{}".format(len(matches), MIN_MATCH_COUNT))
-            matchesMask = None
 
     else:
         break
