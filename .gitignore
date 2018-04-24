@@ -62,3 +62,5 @@ images/
 *.mkv
 
 \.ipynb_checkpoints/
+
+\.idea/
