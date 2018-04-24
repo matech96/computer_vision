@@ -60,3 +60,13 @@ def feature_match(img, resize=True, mask=None):
 def create_mask(img):
     h, w = img.shape[:2]
     return np.zeros((h, w), dtype=np.uint8)
+
+
+def match_features(f1, f2):
+    bf = cv.DescriptorMatcher_create("BruteForce")
+    matches = bf.knnMatch(f1, f2, k=2)
+    good = []
+    for m, n in matches:
+        if m.distance < 0.75 * n.distance:
+            good.append(m)
+    return good
