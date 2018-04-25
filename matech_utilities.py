@@ -17,13 +17,13 @@ def show_pics(plot_column_size, plot_row_size, imgs, **kargs):
 def cv_show_pics(plot_column_size, plot_row_size, imgs, **kargs):
     cv_imgs = []
     for img in imgs:
-        cv_imgs.append(cv.cvtColor(img, cv.COLOR_BGR2RGB))
+        cv_imgs.append(cv.cvtColor(img.copy(), cv.COLOR_BGR2RGB))
     show_pics(plot_column_size, plot_row_size, cv_imgs, **kargs)
 
 
 def draw_box_homogeneous(pts, frame, draw_center=False, color=(255, 0, 0)):
     pts = np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in pts])
-    res = draw_poly_lines(color, frame, pts)
+    res = draw_poly_lines(color, frame.copy(), pts)
     if draw_center:
         center = np.mean(pts, axis=0)
         res = cv.circle(res, (int(center[0]), int(center[1])), 5, color)
@@ -34,14 +34,14 @@ def draw_box_homogeneous(pts, frame, draw_center=False, color=(255, 0, 0)):
 
 def draw_poly_lines(color, frame, pts):
     pts = pts.reshape((-1, 1, 2))
-    res = cv.polylines(frame, [pts], True, color, thickness=5)
+    res = cv.polylines(frame.copy(), [pts], True, color, thickness=5)
     return res
 
 
 def draw_points(pts, frame, color=(0, 255, 255)):
-    res = frame
+    res = frame.copy()
     for p in pts:
-        res = cv.circle(res, (int(p[0]), int(p[1])), 5, color)
+        res = cv.circle(res, (int(p[0]), int(p[1])), 5, color, -1)
     return res
 
 
@@ -55,10 +55,11 @@ def resize_greatest_ax(img, s):
         r = s / y
         nx = x * r
         ny = s
-    return cv.resize(img, (int(nx), int(ny)))
+    return cv.resize(img.copy(), (int(nx), int(ny)))
 
 
 def extract_features(img, resize=True, mask=None):
+    img = img.copy()
     if resize:
         img = resize_greatest_ax(img, 512)
 
