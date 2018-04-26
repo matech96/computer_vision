@@ -8,7 +8,10 @@ class WebCam:
         self.loop_fnc = loop_fnc
         self.flip = flip
 
-    def start_capture(self):
+    def set_loop_fnc(self, loop_fnc):
+        self.loop_fnc = loop_fnc
+
+    def run_loops(self):
         ret = True
         while ret:
             _, frame = self.cap.read()
