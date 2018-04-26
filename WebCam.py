@@ -15,3 +15,9 @@ class WebCam:
             if self.flip:
                 frame = cv.flip(frame, 1)
             ret = self.loop_fnc(frame)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cap.release()
