@@ -7,7 +7,7 @@ class WebCamTracking:
         self.startup_fnc = startup_fnc
         self.loop_fnc = loop_fnc
 
-    def start_capture(self):
+    def run_loops(self):
         with WebCam(self.startup_fnc) as cam:
             cam.run_loops()
             cam.set_loop_fnc(self.loop_fnc)
