@@ -14,14 +14,13 @@ org_box = np.array([[c, r, 1],
                     [c + w, r + h, 1],
                     [c + w, r, 1]
                     ])
-_, prev_box_center = mu.draw_box_homogeneous(org_box, frame, True)
 
 while True:
     # Capture frame-by-frame
     _, frame = cap.read()
     frame = cv.flip(frame, 1)
 
-    res, center = mu.draw_box_homogeneous(org_box, frame, True)
+    res, _ = mu.draw_box_homogeneous(org_box, frame, True)
 
     # Display the resulting frame
     cv.imshow('frame', res)
@@ -39,12 +38,7 @@ prev_point_center = np.mean(p0.reshape((-1, 2)), axis=0)
 
 prev_box = org_box
 
-start = time.time()
 while True:
-    end = time.time()
-    if (end - start) < (1.0/60.0):
-        continue
-    start = time.time()
     _, frame = cap.read()
     frame = cv.flip(frame, 1)
 
@@ -72,7 +66,6 @@ while True:
     old_gray = frame_gray.copy()
     p0 = good_new.reshape(-1, 1, 2)
     prev_box = box
-    # print(1/(end-start))
 
 # When everything done, release the capture
 cap.release()
