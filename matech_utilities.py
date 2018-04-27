@@ -1,9 +1,11 @@
+from typing import *
+
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def show_pics(plot_column_size, plot_row_size, imgs, **kargs):
+def show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], kargs: Dict) -> None:
     for i in range(plot_column_size * plot_row_size):
         plt.subplot(plot_row_size, plot_column_size, i + 1)
         img = imgs[i]
@@ -14,14 +16,14 @@ def show_pics(plot_column_size, plot_row_size, imgs, **kargs):
     plt.show()
 
 
-def cv_show_pics(plot_column_size, plot_row_size, imgs, **kargs):
+def cv_show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], kargs: Dict) -> None:
     cv_imgs = []
     for img in imgs:
         cv_imgs.append(cv.cvtColor(img.copy(), cv.COLOR_BGR2RGB))
     show_pics(plot_column_size, plot_row_size, cv_imgs, **kargs)
 
 
-def draw_box_homogeneous(pts, frame, draw_center=False, color=(255, 0, 0)):
+def draw_box_homogeneous(pts: np.array, frame: np.array, draw_center: bool = False, color: Tuple[int, int, int] = (255, 0, 0)) -> object:
     pts = np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in pts])
     res = draw_poly_lines(color, frame.copy(), pts)
     if draw_center:
@@ -32,20 +34,20 @@ def draw_box_homogeneous(pts, frame, draw_center=False, color=(255, 0, 0)):
         return res
 
 
-def draw_poly_lines(color, frame, pts):
+def draw_poly_lines(color: Tuple[int, int, int], frame: np.array, pts: np.array) -> np.array:
     pts = pts.reshape((-1, 1, 2))
     res = cv.polylines(frame.copy(), [pts], True, color, thickness=5)
     return res
 
 
-def draw_points(pts, frame, color=(0, 255, 255)):
+def draw_points(pts: np.array, frame: np.array, color: Tuple[int, int, int] = (0, 255, 255)) -> np.array:
     res = frame.copy()
     for p in pts:
         res = cv.circle(res, (int(p[0]), int(p[1])), 5, color, -1)
     return res
 
 
-def resize_greatest_ax(img, s):
+def resize_greatest_ax(img: np.array, s: float) -> np.array:
     y, x = img.shape[:2]
     if x > y:
         r = s / x
@@ -58,7 +60,7 @@ def resize_greatest_ax(img, s):
     return cv.resize(img.copy(), (int(nx), int(ny)))
 
 
-def extract_features(img, resize=True, mask=None):
+def extract_features(img: np.array, resize: bool = True, mask: np.array = None) -> Tuple[np.array, List, List]:
     img = img.copy()
     if resize:
         img = resize_greatest_ax(img, 512)
@@ -68,12 +70,40 @@ def extract_features(img, resize=True, mask=None):
     return img, kps, features
 
 
-def create_mask(img):
+def create_mask_like(img: np.array) -> np.array:
     h, w = img.shape[:2]
+    return create_mask(h, w)
+
+
+def create_mask(h: int, w: int) -> np.array:
     return np.zeros((h, w), dtype=np.uint8)
 
 
-def match_features(f1, f2):
+def shape_to_homogeneous_box(shape: Tuple[int, int], upper_left_ratio: int = 4, side_ratio: int = 2) \
+        -> Tuple[np.array, np.array]:
+    c, h, r, vh, vw, w = shape_to_rhcw(shape, side_ratio, upper_left_ratio)
+    mask, org_box = rhcw_to_homogeneous_box(r, h, c, w, vh, vw)
+    return org_box, mask
+
+
+def rhcw_to_homogeneous_box(r, h, c, w, vh, vw):
+    org_box = np.array([[c, r, 1],
+                        [c, r + h, 1],
+                        [c + w, r + h, 1],
+                        [c + w, r, 1]
+                        ])
+    mask = create_mask(vh, vw)
+    mask[r:r + h, c:c + w] = 255
+    return mask, org_box
+
+
+def shape_to_rhcw(shape, side_ratio, upper_left_ratio):
+    vh, vw = shape[:2]
+    r, h, c, w = np.int32((vh / upper_left_ratio, vh / side_ratio, vw / upper_left_ratio, vw / side_ratio))
+    return c, h, r, vh, vw, w
+
+
+def match_features(f1: List, f2: List) -> List:
     bf = cv.DescriptorMatcher_create("BruteForce")
     matches = bf.knnMatch(f1, f2, k=2)
     good = []
@@ -95,6 +125,6 @@ def match_points(matches, pts1, pts2):
     return m_pts1, m_pts2
 
 
-def transform_with_homography(h, pts):
+def transform_with_homography(h: np.array, pts: np.array) -> np.array:
     pts = h.dot(pts.T).T
     return np.array([[int(c[0] / c[2]), int(c[1] / c[2]), 1] for c in pts])
