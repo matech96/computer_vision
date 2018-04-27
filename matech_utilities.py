@@ -61,7 +61,7 @@ def resize_greatest_ax(img: np.array, s: float) -> np.array:
 
 
 def extract_features(img: np.array, resize: bool = True, mask: np.array = None) -> Tuple[np.array, List, List]:
-    img = img.copy()
+    img = cv.UMat(img)
     if resize:
         img = resize_greatest_ax(img, 512)
 

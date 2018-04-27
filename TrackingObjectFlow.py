@@ -64,7 +64,7 @@ class TrackingObjectFlow:
         cam.run_loops()
 
     def run_loops_file(self, file_name, tracking_box):
-        self.rhcv = tracking_box
+        self.rhcw = tracking_box
         cam = TrackingFromVideo(self.__startup_file, self.__loop, file_name)
         cam.run_loops()
 
@@ -72,7 +72,7 @@ class TrackingObjectFlow:
         # c. features
         self.prev_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         vh, vw = self.prev_gray.shape
-        r, h, c, w = self.rhcv
+        r, h, c, w = self.rhcw
         mask, self.prev_box = mu.rhcw_to_homogeneous_box(r, h, c, w, vh, vw)
         _, p00, _ = mu.extract_features(self.prev_gray, resize=False, mask=mask)
         self.prev_pts = np.array([p.pt for p in p00], dtype=np.float32).reshape((-1, 1, 2))
