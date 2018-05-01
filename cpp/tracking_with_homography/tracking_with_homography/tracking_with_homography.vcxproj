@@ -132,9 +132,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeassureTime.cpp" />
     <ClCompile Include="VideoProcessing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MeassureTime.h" />
     <ClInclude Include="VideoProcessing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

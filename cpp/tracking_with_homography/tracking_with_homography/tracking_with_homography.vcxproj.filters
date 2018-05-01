@@ -21,9 +21,15 @@
     <ClCompile Include="VideoProcessing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MeassureTime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VideoProcessing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeassureTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
