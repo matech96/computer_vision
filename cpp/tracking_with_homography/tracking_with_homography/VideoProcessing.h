@@ -2,18 +2,17 @@
 
 #include <opencv2/opencv.hpp>
 #include "MeassureTime.h"
-using loopFncT = bool(*)(const cv::UMat&);
+
 class VideoProcessing
 {
 	cv::VideoCapture& src;
-	loopFncT loopFnc;
 	bool runOneLoop();
 	cv::UMat readFrameFormCamera();
+	virtual bool processFrame(const cv::UMat &frame);
 public:
-	VideoProcessing(cv::VideoCapture& src, loopFncT loopFnc);
+	VideoProcessing(cv::VideoCapture& src);
 	~VideoProcessing();
 
-	void setLoopFnc(loopFncT l);
 	void runLoops();
 };
 

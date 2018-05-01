@@ -1,7 +1,7 @@
 #include "VideoProcessing.h"
 
 
-VideoProcessing::VideoProcessing(cv::VideoCapture& src, loopFncT loopFnc) : src(src), loopFnc(loopFnc){}
+VideoProcessing::VideoProcessing(cv::VideoCapture& src) : src(src){}
 
 VideoProcessing::~VideoProcessing()
 {
@@ -31,9 +31,7 @@ bool VideoProcessing::runOneLoop()
 {
 	MeassureTime t = MeassureTime();
 	cv::UMat frame = readFrameFormCamera();
-	bool do_continue = loopFnc(frame);
-
-	return do_continue;
+	return processFrame(frame);
 }
 
 cv::UMat VideoProcessing::readFrameFormCamera()
@@ -43,4 +41,18 @@ cv::UMat VideoProcessing::readFrameFormCamera()
 	const int flipCodeYAxis = 1;
 	cv::flip(frame, frame, flipCodeYAxis);
 	return frame;
+}
+
+bool VideoProcessing::processFrame(const cv::UMat & frame)
+{
+	auto localFrame = cv::UMat(frame);
+	cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
+	cv::GaussianBlur(localFrame, localFrame, cv::Size(7, 7), 1.5, 1.5);
+	cv::Canny(localFrame, localFrame, 0, 30, 3);
+	cv::imshow("frame", localFrame);
+	if (cv::waitKey(30) >= 0)
+	{
+		return false;
+	}
+	return true;
 }
