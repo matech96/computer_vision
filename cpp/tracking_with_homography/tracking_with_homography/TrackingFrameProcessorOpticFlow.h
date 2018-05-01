@@ -4,7 +4,6 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui.hpp>
 #include "VideoProcessing.h"
-#include "TrackingFrameProcessor.h"
 
 class TrackingFrameProcessorOpticFlow : VideoProcessing
 {

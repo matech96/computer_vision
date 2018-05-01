@@ -133,15 +133,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeassureTime.cpp" />
-    <ClCompile Include="TrackingCameraImage.cpp" />
-    <ClCompile Include="TrackingFrameProcessor.cpp" />
     <ClCompile Include="TrackingFrameProcessorOpticFlow.cpp" />
     <ClCompile Include="VideoProcessing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MeassureTime.h" />
-    <ClInclude Include="TrackingCameraImage.h" />
-    <ClInclude Include="TrackingFrameProcessor.h" />
     <ClInclude Include="TrackingFrameProcessorOpticFlow.h" />
     <ClInclude Include="VideoProcessing.h" />
   </ItemGroup>

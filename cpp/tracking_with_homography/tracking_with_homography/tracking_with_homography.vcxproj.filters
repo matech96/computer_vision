@@ -24,12 +24,6 @@
     <ClCompile Include="MeassureTime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TrackingCameraImage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TrackingFrameProcessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TrackingFrameProcessorOpticFlow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,12 +33,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeassureTime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TrackingCameraImage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TrackingFrameProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TrackingFrameProcessorOpticFlow.h">
