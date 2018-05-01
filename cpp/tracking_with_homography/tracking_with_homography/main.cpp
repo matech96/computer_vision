@@ -3,6 +3,7 @@
 #include <chrono>
 //#include<conio.h>           // may have to modify this line if not using Windows
 #include "VideoProcessing.h"
+#include "TrackingFrameProcessorOpticFlow.h"
 
 bool edgeDetectionLoopFnc(const cv::UMat &frame)
 {
@@ -44,6 +45,6 @@ bool setUpFnc(const cv::UMat &frame) {
 int main(int, char**)
 {
 	auto src = cv::VideoCapture(0);
-	VideoProcessing prc(src);
+	TrackingFrameProcessorOpticFlow prc(src);
 	prc.runLoops();
 }
