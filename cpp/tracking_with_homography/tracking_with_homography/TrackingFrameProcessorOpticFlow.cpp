@@ -52,8 +52,12 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 	{
 		cv::Ptr<cv::ORB> detector = cv::ORB::create();
 		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
-		cv::Mat mask = cv::Mat(height, width, CV_8UC1);
+		cv::Mat mask = cv::Mat(height, width, CV_8U, cv::Scalar(0));
 		cv::rectangle(mask, cv::Rect(x, y, w, h), cv::Scalar(255), -1);
+		//cv::imshow("frame", mask);
+		//std::cout << static_cast<int>(mask.at<uchar>(x - 5, y - 5)) << std::endl;
+		//std::cout << static_cast<int>(mask.at<uchar>(x + 5, y + 5)) << std::endl;
+		//cv::waitKey(30);
 		detector->detectAndCompute(localFrame, mask, keypoints, descriptors);
 		return false;
 	}
