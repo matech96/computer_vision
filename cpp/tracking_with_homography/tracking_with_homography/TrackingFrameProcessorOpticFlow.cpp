@@ -1,4 +1,5 @@
 #include "TrackingFrameProcessorOpticFlow.h"
+#include "EnumerateObject.h"
 
 
 bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
@@ -17,6 +18,26 @@ bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
 	}
 	case TrackingState::TRACKING:
 	{
+		cv::UMat localFrame;
+		cv::cvtColor(frame, localFrame, cv::COLOR_BGR2GRAY);
+		std::vector<cv::Point2f> kpts;
+		std::vector<uchar> status;
+		std::vector<float> err;
+		cv::Size winSize = { 31, 31 };
+		cv::TermCriteria termcrit = { cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 20, 0.03 };
+		cv::calcOpticalFlowPyrLK(prevFrame, localFrame, prevKpts, kpts, status, err, winSize, 3, termcrit, 0, 0.001);
+		int i = 0;
+		for (cv::Point2f point : kpts)
+		{
+			if (!status[i]) {
+				continue;
+			}
+			cv::circle(localFrame, point, 3, cv::Scalar(0, 255, 0), -1, 8);
+			i++;
+		}
+		cv::imshow("frame", localFrame);
+		cv::swap(localFrame, prevFrame);
+		std::swap(kpts, prevKpts);
 		if (cv::waitKey(30) >= 0)
 		{
 			return false;
@@ -50,15 +71,14 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 	cv::imshow("frame", localFrame);
 	if (cv::waitKey(30) >= 0)
 	{
-		cv::Ptr<cv::ORB> detector = cv::ORB::create();
 		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
+		int getUnlimitedCorners = 500;
+		double qualityLevel = 0.01;
+		double minDistance = 5;
 		cv::Mat mask = cv::Mat(height, width, CV_8U, cv::Scalar(0));
 		cv::rectangle(mask, cv::Rect(x, y, w, h), cv::Scalar(255), -1);
-		//cv::imshow("frame", mask);
-		//std::cout << static_cast<int>(mask.at<uchar>(x - 5, y - 5)) << std::endl;
-		//std::cout << static_cast<int>(mask.at<uchar>(x + 5, y + 5)) << std::endl;
-		//cv::waitKey(30);
-		detector->detectAndCompute(localFrame, mask, keypoints, descriptors);
+		cv::goodFeaturesToTrack(localFrame, prevKpts, getUnlimitedCorners, qualityLevel, minDistance, mask, 3, 3, 0, 0.04);
+		cv::swap(localFrame, prevFrame);
 		return false;
 	}
 	return true;

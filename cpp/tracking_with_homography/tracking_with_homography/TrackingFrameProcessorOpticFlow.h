@@ -9,9 +9,13 @@ enum class TrackingState { BOX_DISPLAYING, TRACKING };
 
 class TrackingFrameProcessorOpticFlow : public VideoProcessing
 {
-	TrackingState state;
-	std::vector<cv::KeyPoint> keypoints;
-	cv::UMat descriptors;
+	TrackingState state = { TrackingState::BOX_DISPLAYING};
+	std::vector<cv::KeyPoint> keypoints = {};
+	cv::UMat descriptors = {};
+
+	cv::UMat prevFrame = {};
+	std::vector<cv::Point2f> prevKpts = {};
+
 	bool processFrame(const cv::UMat &frame) override;
 	bool displayBox(const cv::UMat & frame);
 public:

@@ -131,12 +131,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EnumerateObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeassureTime.cpp" />
     <ClCompile Include="TrackingFrameProcessorOpticFlow.cpp" />
     <ClCompile Include="VideoProcessing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EnumerateObject.h" />
     <ClInclude Include="MeassureTime.h" />
     <ClInclude Include="TrackingFrameProcessorOpticFlow.h" />
     <ClInclude Include="VideoProcessing.h" />
