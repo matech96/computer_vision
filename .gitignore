@@ -62,3 +62,9 @@ images/
 *.mkv
 
 \.ipynb_checkpoints/
+
+\.idea/
+*.png
+/cpp/tracking_with_homography/.vs/tracking_with_homography/v15
+/cpp/tracking_with_homography/tracking_with_homography/x64/Debug
+/cpp/tracking_with_homography/x64/Debug
