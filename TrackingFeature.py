@@ -34,7 +34,7 @@ class TrackingFeature:
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         _, pts, feat = mu.extract_features(frame_gray, False)
         matches = mu.match_features(self.org_feat, feat)
-        # print(len(matches))
+        print(len(matches))
         if len(matches) > self.MIN_MATCH_COUNT:
             h = mu.find_homography([p.pt for p in self.org_pts], [p.pt for p in pts], matches)
             if h is not None:
@@ -42,7 +42,7 @@ class TrackingFeature:
                 res, center = mu.draw_box_homogeneous(cs, frame, True)
                 cv.imshow('frame', res)
                 self.__end = time.time()
-                print(1/(self.__end - self.__start))
+                # print(1/(self.__end - self.__start))
             if cv.waitKey(1) & 0xFF == ord('q'):
                 return False
         return True

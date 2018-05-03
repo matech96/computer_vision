@@ -24,6 +24,7 @@ class TrackingObjectFlow:
             _, self.org_kpts, self.org_feat = mu.extract_features(self.prev_gray, resize=False, mask=mask)
             # self.org_pts = np.array([p.pt for p in self.org_kpts], dtype=np.float32).reshape((-1, 1, 2))
             self.prev_kpts = self.org_kpts
+            self.prev_box = self.org_box
             return False
         else:
             return True
@@ -39,17 +40,25 @@ class TrackingObjectFlow:
                 new_kpt = kp
                 new_kpt.pt = (p[0, 0], p[0, 1])
                 kpts.append(new_kpt)
-        print(len(kpts))
         descriptor = cv.xfeatures2d.SURF_create(400)
         kpts, feat = descriptor.compute(frame_gray, kpts)
-        print(len(kpts))
         # pair points
         matches = mu.match_features(self.org_feat, feat)
         # homography
-        h = mu.find_homography([p.pt for p in self.org_kpts], [p.pt for p in kpts], matches)
+        print(len(matches))
+        if len(matches) > 20:
+            h = mu.find_homography([p.pt for p in self.org_kpts], [p.pt for p in kpts], matches)
+            if h is not None:
+                box = mu.transform_with_homography(h, self.org_box)
+        else:
+            can = prev_pts[st == 1]
+            array = np.array([p.pt for p in kpts])
+            h, _ = cv.findHomography(can, array, cv.RANSAC, 5.0)
+            if h is not None:
+                box = mu.transform_with_homography(h, self.prev_box)
         if h is not None:
-            box = mu.transform_with_homography(h, self.org_box)
             res, box_center = mu.draw_box_homogeneous(box, frame, True)
+            self.prev_box = box
         else:
             res = frame
 
