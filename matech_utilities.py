@@ -23,7 +23,8 @@ def cv_show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array]
     show_pics(plot_column_size, plot_row_size, cv_imgs, **kargs)
 
 
-def draw_box_homogeneous(pts: np.array, frame: np.array, draw_center: bool = False, color: Tuple[int, int, int] = (255, 0, 0)) -> object:
+def draw_box_homogeneous(pts: np.array, frame: np.array, draw_center: bool = False,
+                         color: Tuple[int, int, int] = (255, 0, 0)) -> object:
     pts = np.array([[int(c[0] / c[2]), int(c[1] / c[2])] for c in pts])
     res = draw_poly_lines(color, frame.copy(), pts)
     if draw_center:
@@ -128,3 +129,12 @@ def match_points(matches, pts1, pts2):
 def transform_with_homography(h: np.array, pts: np.array) -> np.array:
     pts = h.dot(pts.T).T
     return np.array([[int(c[0] / c[2]), int(c[1] / c[2]), 1] for c in pts])
+
+
+def points_to_keypoints(pts, prev_kpts):
+    kpts = []
+    for pt, pkpt in zip(pts, prev_kpts):
+        kpt = pkpt
+        kpt.pt = (pt[0], pt[1])
+        kpts.append(kpt)
+    return kpts
