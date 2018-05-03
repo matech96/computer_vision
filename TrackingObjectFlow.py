@@ -39,24 +39,26 @@ class TrackingObjectFlow:
                 new_kpt = kp
                 new_kpt.pt = (p[0, 0], p[0, 1])
                 kpts.append(new_kpt)
+        print(len(kpts))
         descriptor = cv.xfeatures2d.SURF_create(400)
-        new_pts, desc = descriptor.compute(frame_gray, pts)
+        kpts, feat = descriptor.compute(frame_gray, kpts)
+        print(len(kpts))
         # pair points
-        condition = np.array(st == 1)
-        good_new = pts[condition]
-        good_old = self.prev_pts[condition]
+        matches = mu.match_features(self.org_feat, feat)
         # homography
-        h, m = cv.findHomography(good_old, good_new, cv.RANSAC, 0)
-        box = mu.transform_with_homography(h, self.prev_box)
+        h = mu.find_homography([p.pt for p in self.org_kpts], [p.pt for p in kpts], matches)
+        if h is not None:
+            box = mu.transform_with_homography(h, self.org_box)
+            res, box_center = mu.draw_box_homogeneous(box, frame, True)
+        else:
+            res = frame
 
-        res = mu.draw_points(good_new, frame)
-        res, box_center = mu.draw_box_homogeneous(box, res, True)
+        res = mu.draw_points([p.pt for p in kpts], res)
         cv.imshow('frame', res)
 
         # update
         self.prev_gray = frame_gray.copy()
-        self.prev_pts = good_new.reshape(-1, 1, 2)
-        self.prev_box = box
+        self.prev_kpts = kpts
 
         if cv.waitKey(1) & 0xFF == ord('q'):
             return False
