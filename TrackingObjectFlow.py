@@ -12,18 +12,18 @@ class TrackingObjectFlow:
         super().__init__()
 
     def __startup(self, frame):
-        org_box, mask = mu.shape_to_homogeneous_box(frame.shape)
+        self.org_box, mask = mu.shape_to_homogeneous_box(frame.shape)
 
-        res, _ = mu.draw_box_homogeneous(org_box, frame, True)
+        res, _ = mu.draw_box_homogeneous(self.org_box, frame, True)
 
         # Display the resulting frame
         cv.imshow('frame', res)
         if cv.waitKey(1) & 0xFF == ord('c'):
             # c. features
             self.prev_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            _, p00, _ = mu.extract_features(self.prev_gray, resize=False, mask=mask)
-            self.prev_pts = np.array([p.pt for p in p00], dtype=np.float32).reshape((-1, 1, 2))
-            self.prev_box = org_box
+            _, self.org_kpts, self.org_feat = mu.extract_features(self.prev_gray, resize=False, mask=mask)
+            # self.org_pts = np.array([p.pt for p in self.org_kpts], dtype=np.float32).reshape((-1, 1, 2))
+            self.prev_kpts = self.org_kpts
             return False
         else:
             return True
@@ -31,18 +31,22 @@ class TrackingObjectFlow:
     def __loop(self, frame):
         # Optic flow
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        # frame_gray = cv.GaussianBlur(frame_gray, (self.sigma, self.sigma), 0)
-        pts, st, err = cv.calcOpticalFlowPyrLK(self.prev_gray, frame_gray, self.prev_pts, None)
+        prev_pts = np.array([p.pt for p in self.prev_kpts], dtype=np.float32).reshape((-1, 1, 2))
+        pts, st, err = cv.calcOpticalFlowPyrLK(self.prev_gray, frame_gray, prev_pts, None)
+        kpts = []
+        for (p, s), kp in zip(zip(pts, st), self.prev_kpts):
+            if s == 1:
+                new_kpt = kp
+                new_kpt.pt = (p[0, 0], p[0, 1])
+                kpts.append(new_kpt)
+        descriptor = cv.xfeatures2d.SURF_create(400)
+        new_pts, desc = descriptor.compute(frame_gray, pts)
         # pair points
         condition = np.array(st == 1)
         good_new = pts[condition]
         good_old = self.prev_pts[condition]
         # homography
-        he, m = cv.findHomography(good_new, good_new, cv.RANSAC, 0)
-        np.fill_diagonal(he, 0)
         h, m = cv.findHomography(good_old, good_new, cv.RANSAC, 0)
-        h = h-he
-        h = np.around(h, decimals=3)
         box = mu.transform_with_homography(h, self.prev_box)
 
         res = mu.draw_points(good_new, frame)
