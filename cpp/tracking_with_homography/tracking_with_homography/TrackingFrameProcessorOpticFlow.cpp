@@ -29,21 +29,13 @@ bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
 
 bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 {
-	int height = frame.rows;
-	int width = frame.cols;
+	const int height = frame.rows;
+	const int width = frame.cols;
+	const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
+	corners = MatechUtilities::rectangleToPoints(rectangle);
 	auto localFrame = cv::UMat(frame);
 	const cv::Scalar color(0, 255, 0);
-	int x = width / 4;
-	int y = height / 4;
-	int w = width / 2;
-	int h = height / 2;
-	auto rectangle = cv::Rect(x, y, w, h);
-	{
-		corners = MatechUtilities::rectangleToPoints(rectangle);
-	}
 	cv::polylines(localFrame, corners, true, color);
-	cv::Size subPixWinSize = { 10, 10 };
-	cv::TermCriteria termcrit = { cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 20, 0.03 };
 	cv::imshow("frame", localFrame);
 	if (cv::waitKey(30) >= 0)
 	{
@@ -54,7 +46,6 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 		cv::Mat mask = cv::Mat(height, width, CV_8U, cv::Scalar(0));
 		cv::rectangle(mask, rectangle, cv::Scalar(255), -1);
 		cv::goodFeaturesToTrack(localFrame, prevKpts, max_count, qualityLevel, minDistance, mask, 3, 3, 0, 0.04);
-		cv::cornerSubPix(localFrame, prevKpts, subPixWinSize, cv::Size(-1, -1), termcrit);
 		prevFrame = localFrame;
 		cv::drawKeypoints(frame, keypoints, localFrame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
 		cv::imshow("frame", localFrame);
