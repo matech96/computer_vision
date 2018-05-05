@@ -13,11 +13,12 @@ class TrackingFrameProcessorOpticFlow : public VideoProcessing
 	TrackingState state = { TrackingState::BOX_DISPLAYING};
 	std::vector<cv::KeyPoint> keypoints = {};
 	cv::UMat descriptors = {};
-	std::vector<cv::Point> corners = {};
+	std::vector<cv::Point> cornerPoints = {};
 
 	cv::UMat prevFrame = {};
 	std::vector<cv::Point2f> prevKpts = {};
 
+	void initializeCornerPoints(const cv::UMat & frame);
 	bool processFrame(const cv::UMat &frame) override;
 	bool tracking(const cv::UMat & frame);
 	bool displayBox(const cv::UMat & frame);

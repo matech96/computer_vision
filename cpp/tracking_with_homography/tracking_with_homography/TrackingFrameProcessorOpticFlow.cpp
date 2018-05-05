@@ -1,5 +1,14 @@
 #include "TrackingFrameProcessorOpticFlow.h"
+#include "DrawingUtilities.h"
 
+
+void TrackingFrameProcessorOpticFlow::initializeCornerPoints(const cv::UMat & frame)
+{
+	const int height = frame.rows;
+	const int width = frame.cols;
+	const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
+	cornerPoints = MatechUtilities::rectangleToPoints(rectangle);
+}
 
 bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
 {
@@ -31,11 +40,9 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 {
 	const int height = frame.rows;
 	const int width = frame.cols;
-	const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
-	corners = MatechUtilities::rectangleToPoints(rectangle);
+	initializeCornerPoints(frame);
 	auto localFrame = cv::UMat(frame);
-	const cv::Scalar color(0, 255, 0);
-	cv::polylines(localFrame, corners, true, color);
+	DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
 	cv::imshow("frame", localFrame);
 	if (cv::waitKey(30) >= 0)
 	{
@@ -44,6 +51,7 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 		double qualityLevel = 0.01;
 		double minDistance = 10;
 		cv::Mat mask = cv::Mat(height, width, CV_8U, cv::Scalar(0));
+		const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
 		cv::rectangle(mask, rectangle, cv::Scalar(255), -1);
 		cv::goodFeaturesToTrack(localFrame, prevKpts, max_count, qualityLevel, minDistance, mask, 3, 3, 0, 0.04);
 		prevFrame = localFrame;
@@ -84,17 +92,17 @@ bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 		cv::Mat vectors(3, 4, CV_64F, 1);
 		for (size_t i = 0; i < 4; i++)
 		{
-			vectors.at<double>(0, i) = corners[i].x;
-			vectors.at<double>(1, i) = corners[i].y;
+			vectors.at<double>(0, i) = cornerPoints[i].x;
+			vectors.at<double>(1, i) = cornerPoints[i].y;
 		}
 		cv::Mat res = H * vectors;
 		for (size_t i = 0; i < 4; i++)
 		{
 			double h = res.at<double>(2, i);
-			corners[i].x = res.at<double>(0, i) / h;
-			corners[i].y = res.at<double>(1, i) / h;
+			cornerPoints[i].x = res.at<double>(0, i) / h;
+			cornerPoints[i].y = res.at<double>(1, i) / h;
 		}
-		cv::polylines(localFrame, corners, true, cv::Scalar(255, 255, 0));
+		cv::polylines(localFrame, cornerPoints, true, cv::Scalar(255, 255, 0));
 		cv::imshow("frame", localFrame);
 		cv::swap(prevFrame, grayFrame);
 		prevKpts = filteredKpts;
