@@ -1,4 +1,5 @@
 #include "VideoProcessing.h"
+#include "MatechUtilities.h"
 
 
 VideoProcessing::VideoProcessing(cv::VideoCapture& src) : src(src){}
@@ -12,7 +13,6 @@ void VideoProcessing::runLoops()
 	if (!src.isOpened())  // check if we succeeded
 		return;
 
-	cv::UMat edges;
 	while (true)
 	{
 		bool do_continue = runOneLoop();
@@ -41,7 +41,7 @@ cv::UMat VideoProcessing::readFrameFormCamera()
 bool VideoProcessing::processFrame(const cv::UMat & frame)
 {
 	cv::imshow("frame", frame);
-	if (cv::waitKey(30) >= 0)
+	if (MatechUtilities::isButtonPushed())
 	{
 		return false;
 	}

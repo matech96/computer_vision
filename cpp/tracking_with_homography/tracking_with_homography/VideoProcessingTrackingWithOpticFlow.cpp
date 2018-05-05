@@ -1,8 +1,8 @@
-#include "TrackingFrameProcessorOpticFlow.h"
+#include "VideoProcessingTrackingWithOpticFlow.h"
 #include "DrawingUtilities.h"
 
 
-void TrackingFrameProcessorOpticFlow::initializeCornerPoints(const cv::UMat & frame)
+void VideoProcessingTrackingWithOpticFlow::initializeCornerPoints(const cv::UMat & frame)
 {
 	const int height = frame.rows;
 	const int width = frame.cols;
@@ -10,7 +10,7 @@ void TrackingFrameProcessorOpticFlow::initializeCornerPoints(const cv::UMat & fr
 	cornerPoints = MatechUtilities::rectangleToPoints(rectangle);
 }
 
-bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
+bool VideoProcessingTrackingWithOpticFlow::processFrame(const cv::UMat & frame)
 {
 	switch (state) {
 	case TrackingState::INITIALIZATION:
@@ -38,7 +38,7 @@ bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
 	return true;
 }
 
-bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
+bool VideoProcessingTrackingWithOpticFlow::displayBox(const cv::UMat & frame)
 {
 	auto localFrame = cv::UMat(frame);
 	DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
@@ -52,7 +52,7 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 }
 
 
-void TrackingFrameProcessorOpticFlow::setUpTrackingParameters(const cv::UMat & frame)
+void VideoProcessingTrackingWithOpticFlow::setUpTrackingParameters(const cv::UMat & frame)
 {
 	cv::Mat mask = MatechUtilities::getMaskAtCenter(frame);
 	cv::UMat grayFrame = frame;
@@ -62,32 +62,21 @@ void TrackingFrameProcessorOpticFlow::setUpTrackingParameters(const cv::UMat & f
 }
 
 
-bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
+bool VideoProcessingTrackingWithOpticFlow::tracking(const cv::UMat & frame)
 {
+	cv::UMat localFrame = frame;
 	cv::UMat grayFrame;
 	cv::cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
 
 	auto tupel = MatechUtilities::trackPoints(prevFrame, grayFrame, prevKpts);
 	cv::Mat H = std::get<0>(tupel);
 	std::vector<cv::Point2f> filteredKpts = std::get<1>(tupel);
+	cornerPoints = MatechUtilities::transformPointsWithHomography(H, cornerPoints);
+	displayTrackingState(localFrame, filteredKpts);
+	// Updating
+	cv::swap(prevFrame, grayFrame);
+	std::swap(prevKpts, filteredKpts);
 
-	cv::UMat localFrame = frame;
-	DrawingUtilities::drawPointsOnto(localFrame, filteredKpts);
-	try {
-		cv::Mat vectors = MatechUtilities::pointsToHomogeneousMatrix(cornerPoints);
-		cv::Mat res = H * vectors;
-		cornerPoints = MatechUtilities::homogeneousMatrixToPoints(res);
-		//Displaying
-		DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
-		cv::imshow("frame", localFrame);
-		// Updating
-		cv::swap(prevFrame, grayFrame);
-		std::swap(prevKpts, filteredKpts);
-	}
-	catch (const std::exception &exc) {
-		std::cout << exc.what() << std::endl;
-		return false;
-	}
 	if (MatechUtilities::isButtonPushed())
 	{
 		return false;
@@ -95,10 +84,18 @@ bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 	return true;
 }
 
-TrackingFrameProcessorOpticFlow::TrackingFrameProcessorOpticFlow(cv::VideoCapture & src) : VideoProcessing(src)
+void VideoProcessingTrackingWithOpticFlow::displayTrackingState(cv::UMat &localFrame, std::vector<cv::Point2f> &filteredKpts)
+{
+
+	DrawingUtilities::drawPointsOnto(localFrame, filteredKpts);
+	DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
+	cv::imshow("frame", localFrame);
+}
+
+VideoProcessingTrackingWithOpticFlow::VideoProcessingTrackingWithOpticFlow(cv::VideoCapture & src) : VideoProcessing(src)
 {
 }
 
-TrackingFrameProcessorOpticFlow::~TrackingFrameProcessorOpticFlow()
+VideoProcessingTrackingWithOpticFlow::~VideoProcessingTrackingWithOpticFlow()
 {
 }

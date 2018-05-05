@@ -8,7 +8,7 @@
 
 enum class TrackingState { INITIALIZATION, BOX_DISPLAYING, TRACKING };
 
-class TrackingFrameProcessorOpticFlow : public VideoProcessing
+class VideoProcessingTrackingWithOpticFlow : public VideoProcessing
 {
 	TrackingState state = { TrackingState::INITIALIZATION };
 	std::vector<cv::Point2i> cornerPoints = {};
@@ -19,9 +19,10 @@ class TrackingFrameProcessorOpticFlow : public VideoProcessing
 	void initializeCornerPoints(const cv::UMat & frame);
 	bool processFrame(const cv::UMat &frame) override;
 	bool tracking(const cv::UMat & frame);
+	void displayTrackingState(cv::UMat &localFrame, std::vector<cv::Point2f> &filteredKpts);
 	bool displayBox(const cv::UMat & frame);
 	void setUpTrackingParameters(const cv::UMat & localFrame);
 public:
-	TrackingFrameProcessorOpticFlow(cv::VideoCapture& src);
-	~TrackingFrameProcessorOpticFlow();
+	VideoProcessingTrackingWithOpticFlow(cv::VideoCapture& src);
+	~VideoProcessingTrackingWithOpticFlow();
 };

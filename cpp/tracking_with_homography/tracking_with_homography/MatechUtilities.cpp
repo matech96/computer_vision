@@ -107,3 +107,10 @@ std::tuple<cv::Mat, std::vector<cv::Point2f>> MatechUtilities::trackPoints(const
 	return { H, filteredPoints };
 }
 
+std::vector<cv::Point> MatechUtilities::transformPointsWithHomography(const cv::Mat & H, const std::vector<cv::Point>& points)
+{
+	const cv::Mat vectors = MatechUtilities::pointsToHomogeneousMatrix(points);
+	const cv::Mat res = H * vectors;
+	return MatechUtilities::homogeneousMatrixToPoints(res);
+}
+

@@ -13,5 +13,6 @@ namespace MatechUtilities
 	std::vector<cv::Point2i> homogeneousMatrixToPoints(const cv::Mat &points);
 	bool isButtonPushed();
 	std::tuple<cv::Mat, std::vector<cv::Point2f>> trackPoints(const cv::UMat & prevGeryFrame, const cv::UMat & geryFrame, const std::vector<cv::Point2f> &prevPoints);
+	std::vector<cv::Point> transformPointsWithHomography(const cv::Mat &H, const std::vector<cv::Point> &points);
 };
 
