@@ -10,7 +10,7 @@ enum class TrackingState { INITIALIZATION, BOX_DISPLAYING, TRACKING };
 
 class TrackingFrameProcessorOpticFlow : public VideoProcessing
 {
-	TrackingState state = { TrackingState::BOX_DISPLAYING};
+	TrackingState state = { TrackingState::INITIALIZATION };
 	std::vector<cv::KeyPoint> keypoints = {};
 	cv::UMat descriptors = {};
 	std::vector<cv::Point> cornerPoints = {};

@@ -37,3 +37,15 @@ cv::Mat MatechUtilities::getMaskAtCenter(const cv::UMat & frame)
 	cv::rectangle(mask, rectangle, mask_accept_color, recatangle_fill);
 	return mask;
 }
+
+std::vector<cv::Point2f> MatechUtilities::getPointsToTrack(const cv::UMat & frame, const cv::Mat & mask)
+{
+	const int max_count = 500;
+	const double qualityLevel = 0.01;
+	const double minDistance = 10;
+	const int blockSize = 3;
+	const int gradientSize = 3;
+	std::vector<cv::Point2f> kpts{};
+	cv::goodFeaturesToTrack(frame, kpts, max_count, qualityLevel, minDistance, mask, blockSize, gradientSize);
+	return kpts;
+}
