@@ -47,10 +47,10 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 	{
 		cv::Mat mask = MatechUtilities::getMaskAtCenter(localFrame);
 		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
+
 		prevKpts = MatechUtilities::getPointsToTrack(localFrame, mask);
 		prevFrame = localFrame;
-		cv::drawKeypoints(frame, keypoints, localFrame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
-		cv::imshow("frame", localFrame);
+
 		return false;
 	}
 	return true;
@@ -71,18 +71,11 @@ bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 	cv::Size winSize = { 31, 31 };
 	cv::TermCriteria termcrit = { cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 20, 0.03 };
 	cv::calcOpticalFlowPyrLK(prevFrame, grayFrame, prevKpts, kpts, status, err);// , winSize, 3, termcrit, 0, 0.001);
-	int i = 0;
-	std::vector<cv::Point2f> filteredPrevKpts = {};
-	std::vector<cv::Point2f> filteredKpts = {};
-	for (cv::Point2f point : kpts)
+	std::vector<cv::Point2f> filteredPrevKpts = MatechUtilities::filterPoints(prevKpts, status);
+	std::vector<cv::Point2f> filteredKpts = MatechUtilities::filterPoints(kpts, status);
+	for (cv::Point2f point : filteredKpts)
 	{
-		if (!status[i]) {
-			continue;
-		}
-		filteredPrevKpts.push_back(prevKpts[i]);
-		filteredKpts.push_back(kpts[i]);
 		cv::circle(localFrame, point, 3, cv::Scalar(0, 255, 0), -1, 8);
-		i++;
 	}
 	try {
 		cv::Mat H = cv::findHomography(filteredPrevKpts, filteredKpts);

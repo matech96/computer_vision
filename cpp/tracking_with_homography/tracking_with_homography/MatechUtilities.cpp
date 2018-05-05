@@ -49,3 +49,17 @@ std::vector<cv::Point2f> MatechUtilities::getPointsToTrack(const cv::UMat & fram
 	cv::goodFeaturesToTrack(frame, kpts, max_count, qualityLevel, minDistance, mask, blockSize, gradientSize);
 	return kpts;
 }
+
+std::vector<cv::Point2f> MatechUtilities::filterPoints(const std::vector<cv::Point2f>& points, const std::vector<uchar>& status)
+{
+	assert(points.size() == status.size());
+
+	std::vector<cv::Point2f> res{};
+	for (int i = 0; i < points.size(); i++)
+	{
+		if (status[i]) {
+			res.push_back(points[i]);
+		}
+	}
+	return res;
+}
