@@ -40,10 +40,6 @@ cv::UMat VideoProcessing::readFrameFormCamera()
 
 bool VideoProcessing::processFrame(const cv::UMat & frame)
 {
-	//auto localFrame = cv::UMat(frame);
-	//cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
-	//cv::GaussianBlur(localFrame, localFrame, cv::Size(7, 7), 1.5, 1.5);
-	//cv::Canny(localFrame, localFrame, 0, 30, 3);
 	cv::imshow("frame", frame);
 	if (cv::waitKey(30) >= 0)
 	{

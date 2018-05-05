@@ -4,8 +4,9 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/highgui.hpp>
 #include "VideoProcessing.h"
+#include "MatechUtilities.h"
 
-enum class TrackingState { BOX_DISPLAYING, TRACKING };
+enum class TrackingState { INITIALIZATION, BOX_DISPLAYING, TRACKING };
 
 class TrackingFrameProcessorOpticFlow : public VideoProcessing
 {
@@ -18,9 +19,9 @@ class TrackingFrameProcessorOpticFlow : public VideoProcessing
 	std::vector<cv::Point2f> prevKpts = {};
 
 	bool processFrame(const cv::UMat &frame) override;
+	bool tracking(const cv::UMat & frame);
 	bool displayBox(const cv::UMat & frame);
 public:
 	TrackingFrameProcessorOpticFlow(cv::VideoCapture& src);
 	~TrackingFrameProcessorOpticFlow();
 };
-
