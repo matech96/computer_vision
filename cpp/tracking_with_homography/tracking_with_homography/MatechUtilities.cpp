@@ -23,3 +23,17 @@ cv::Rect MatechUtilities::getRectangleAtCenter(const int width, const int height
 	const int h = height / 2;
 	return cv::Rect(x, y, w, h);
 }
+
+cv::Mat MatechUtilities::getMaskAtCenter(const cv::UMat & frame)
+{
+	const int height = frame.rows;
+	const int width = frame.cols;
+	const cv::Scalar mask_ignore_color{ 0 };
+	const cv::Scalar mask_accept_color{ 255 };
+	const int recatangle_fill = -1;
+
+	cv::Mat mask{ height, width, CV_8U, mask_ignore_color };
+	const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
+	cv::rectangle(mask, rectangle, mask_accept_color, recatangle_fill);
+	return mask;
+}

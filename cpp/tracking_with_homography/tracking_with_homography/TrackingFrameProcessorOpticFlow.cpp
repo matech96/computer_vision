@@ -38,21 +38,17 @@ bool TrackingFrameProcessorOpticFlow::processFrame(const cv::UMat & frame)
 
 bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 {
-	const int height = frame.rows;
-	const int width = frame.cols;
 	initializeCornerPoints(frame);
 	auto localFrame = cv::UMat(frame);
 	DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
 	cv::imshow("frame", localFrame);
 	if (cv::waitKey(30) >= 0)
 	{
-		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
 		int max_count = 500;
 		double qualityLevel = 0.01;
 		double minDistance = 10;
-		cv::Mat mask = cv::Mat(height, width, CV_8U, cv::Scalar(0));
-		const cv::Rect rectangle = MatechUtilities::getRectangleAtCenter(width, height);
-		cv::rectangle(mask, rectangle, cv::Scalar(255), -1);
+		cv::Mat mask = MatechUtilities::getMaskAtCenter(localFrame);
+		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
 		cv::goodFeaturesToTrack(localFrame, prevKpts, max_count, qualityLevel, minDistance, mask, 3, 3, 0, 0.04);
 		prevFrame = localFrame;
 		cv::drawKeypoints(frame, keypoints, localFrame, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
@@ -61,6 +57,7 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 	}
 	return true;
 }
+
 
 bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 {

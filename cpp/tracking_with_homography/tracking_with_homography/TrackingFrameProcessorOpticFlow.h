@@ -26,4 +26,3 @@ public:
 	TrackingFrameProcessorOpticFlow(cv::VideoCapture& src);
 	~TrackingFrameProcessorOpticFlow();
 };
-
