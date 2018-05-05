@@ -11,7 +11,7 @@ enum class TrackingState { INITIALIZATION, BOX_DISPLAYING, TRACKING };
 class TrackingFrameProcessorOpticFlow : public VideoProcessing
 {
 	TrackingState state = { TrackingState::INITIALIZATION };
-	std::vector<cv::Point> cornerPoints = {};
+	std::vector<cv::Point2i> cornerPoints = {};
 
 	cv::UMat prevFrame = {};
 	std::vector<cv::Point2f> prevKpts = {};

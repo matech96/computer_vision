@@ -63,3 +63,28 @@ std::vector<cv::Point2f> MatechUtilities::filterPoints(const std::vector<cv::Poi
 	}
 	return res;
 }
+
+cv::Mat MatechUtilities::pointsToHomogeneousMatrix(const std::vector<cv::Point2i>& points)
+{
+	cv::Mat res (3, 4, CV_64F, 1 );
+	for (size_t i = 0; i < 4; i++)
+	{
+		res.at<double>(0, i) = static_cast<double>(points[i].x);
+		res.at<double>(1, i) = static_cast<double>(points[i].y);
+	}
+	return res;
+}
+
+std::vector<cv::Point2i> MatechUtilities::homogeneousMatrixToPoints(const cv::Mat & matrix)
+{
+	assert(matrix.rows == 3);
+	std::vector<cv::Point2i> res{};
+	for (size_t i = 0; i < matrix.cols; i++)
+	{
+		double h = matrix.at<double>(2, i);
+		const int x = matrix.at<double>(0, i) / h;
+		const int y = matrix.at<double>(1, i) / h;
+		res.push_back({ x, y });
+	}
+	return res;
+}

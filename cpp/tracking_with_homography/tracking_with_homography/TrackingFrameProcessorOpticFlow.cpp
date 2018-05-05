@@ -61,37 +61,26 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 
 bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 {
-	cv::UMat localFrame;
-	frame.copyTo(localFrame);
 	cv::UMat grayFrame;
 	cv::cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
+
 	std::vector<cv::Point2f> kpts;
 	std::vector<uchar> status;
 	std::vector<float> err;
-	cv::Size winSize = { 31, 31 };
-	cv::TermCriteria termcrit = { cv::TermCriteria::COUNT | cv::TermCriteria::EPS, 20, 0.03 };
-	cv::calcOpticalFlowPyrLK(prevFrame, grayFrame, prevKpts, kpts, status, err);// , winSize, 3, termcrit, 0, 0.001);
+	cv::calcOpticalFlowPyrLK(prevFrame, grayFrame, prevKpts, kpts, status, err);
+
 	std::vector<cv::Point2f> filteredPrevKpts = MatechUtilities::filterPoints(prevKpts, status);
 	std::vector<cv::Point2f> filteredKpts = MatechUtilities::filterPoints(kpts, status);
+	cv::UMat localFrame = frame;
 	for (cv::Point2f point : filteredKpts)
 	{
 		cv::circle(localFrame, point, 3, cv::Scalar(0, 255, 0), -1, 8);
 	}
 	try {
 		cv::Mat H = cv::findHomography(filteredPrevKpts, filteredKpts);
-		cv::Mat vectors(3, 4, CV_64F, 1);
-		for (size_t i = 0; i < 4; i++)
-		{
-			vectors.at<double>(0, i) = cornerPoints[i].x;
-			vectors.at<double>(1, i) = cornerPoints[i].y;
-		}
+		cv::Mat vectors = MatechUtilities::pointsToHomogeneousMatrix(cornerPoints);
 		cv::Mat res = H * vectors;
-		for (size_t i = 0; i < 4; i++)
-		{
-			double h = res.at<double>(2, i);
-			cornerPoints[i].x = res.at<double>(0, i) / h;
-			cornerPoints[i].y = res.at<double>(1, i) / h;
-		}
+		cornerPoints = MatechUtilities::homogeneousMatrixToPoints(res);
 		cv::polylines(localFrame, cornerPoints, true, cv::Scalar(255, 255, 0));
 		cv::imshow("frame", localFrame);
 		cv::swap(prevFrame, grayFrame);
