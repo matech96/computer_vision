@@ -20,6 +20,7 @@ class TrackingFrameProcessorOpticFlow : public VideoProcessing
 	bool processFrame(const cv::UMat &frame) override;
 	bool tracking(const cv::UMat & frame);
 	bool displayBox(const cv::UMat & frame);
+	void setUpTrackingParameters(const cv::UMat & localFrame);
 public:
 	TrackingFrameProcessorOpticFlow(cv::VideoCapture& src);
 	~TrackingFrameProcessorOpticFlow();

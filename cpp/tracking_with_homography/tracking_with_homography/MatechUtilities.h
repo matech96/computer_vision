@@ -11,5 +11,7 @@ namespace MatechUtilities
 	std::vector<cv::Point2f> filterPoints(const std::vector<cv::Point2f> &points, const std::vector<uchar> &status);
 	cv::Mat pointsToHomogeneousMatrix(const std::vector<cv::Point2i>& points);
 	std::vector<cv::Point2i> homogeneousMatrixToPoints(const cv::Mat &points);
+	bool isButtonPushed();
+	std::tuple<cv::Mat, std::vector<cv::Point2f>> trackPoints(const cv::UMat & prevGeryFrame, const cv::UMat & geryFrame, const std::vector<cv::Point2f> &prevPoints);
 };
 

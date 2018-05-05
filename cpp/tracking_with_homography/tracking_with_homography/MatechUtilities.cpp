@@ -66,7 +66,7 @@ std::vector<cv::Point2f> MatechUtilities::filterPoints(const std::vector<cv::Poi
 
 cv::Mat MatechUtilities::pointsToHomogeneousMatrix(const std::vector<cv::Point2i>& points)
 {
-	cv::Mat res (3, 4, CV_64F, 1 );
+	cv::Mat res(3, 4, CV_64F, 1);
 	for (size_t i = 0; i < 4; i++)
 	{
 		res.at<double>(0, i) = static_cast<double>(points[i].x);
@@ -88,3 +88,22 @@ std::vector<cv::Point2i> MatechUtilities::homogeneousMatrixToPoints(const cv::Ma
 	}
 	return res;
 }
+
+bool MatechUtilities::isButtonPushed()
+{
+	return cv::waitKey(30) >= 0;
+}
+
+std::tuple<cv::Mat, std::vector<cv::Point2f>> MatechUtilities::trackPoints(const cv::UMat & prevGeryFrame, const cv::UMat & geryFrame, const std::vector<cv::Point2f>& prevPoints)
+{
+	std::vector<cv::Point2f> points;
+	std::vector<uchar> status;
+	std::vector<float> err;
+	cv::calcOpticalFlowPyrLK(prevGeryFrame, geryFrame, prevPoints, points, status, err);
+
+	std::vector<cv::Point2f> filteredPrevPoints = MatechUtilities::filterPoints(prevPoints, status);
+	std::vector<cv::Point2f> filteredPoints = MatechUtilities::filterPoints(points, status);
+	cv::Mat H = cv::findHomography(filteredPrevPoints, filteredPoints);
+	return { H, filteredPoints };
+}
+

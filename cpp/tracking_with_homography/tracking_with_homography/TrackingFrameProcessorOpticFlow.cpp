@@ -43,20 +43,23 @@ bool TrackingFrameProcessorOpticFlow::displayBox(const cv::UMat & frame)
 	auto localFrame = cv::UMat(frame);
 	DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
 	cv::imshow("frame", localFrame);
-	if (cv::waitKey(30) >= 0)
+	if (MatechUtilities::isButtonPushed())
 	{
-		cv::Mat mask = MatechUtilities::getMaskAtCenter(localFrame);
-		cv::cvtColor(localFrame, localFrame, cv::COLOR_BGR2GRAY);
-
-		prevKpts = MatechUtilities::getPointsToTrack(localFrame, mask);
-		prevFrame = localFrame;
-
+		setUpTrackingParameters(frame);
 		return false;
 	}
 	return true;
 }
 
 
+void TrackingFrameProcessorOpticFlow::setUpTrackingParameters(const cv::UMat & frame)
+{
+	cv::Mat mask = MatechUtilities::getMaskAtCenter(frame);
+	cv::UMat grayFrame = frame;
+	cv::cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
+	prevKpts = MatechUtilities::getPointsToTrack(grayFrame, mask);
+	prevFrame = grayFrame;
+}
 
 
 bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
@@ -64,33 +67,28 @@ bool TrackingFrameProcessorOpticFlow::tracking(const cv::UMat & frame)
 	cv::UMat grayFrame;
 	cv::cvtColor(frame, grayFrame, cv::COLOR_BGR2GRAY);
 
-	std::vector<cv::Point2f> kpts;
-	std::vector<uchar> status;
-	std::vector<float> err;
-	cv::calcOpticalFlowPyrLK(prevFrame, grayFrame, prevKpts, kpts, status, err);
+	auto tupel = MatechUtilities::trackPoints(prevFrame, grayFrame, prevKpts);
+	cv::Mat H = std::get<0>(tupel);
+	std::vector<cv::Point2f> filteredKpts = std::get<1>(tupel);
 
-	std::vector<cv::Point2f> filteredPrevKpts = MatechUtilities::filterPoints(prevKpts, status);
-	std::vector<cv::Point2f> filteredKpts = MatechUtilities::filterPoints(kpts, status);
 	cv::UMat localFrame = frame;
-	for (cv::Point2f point : filteredKpts)
-	{
-		cv::circle(localFrame, point, 3, cv::Scalar(0, 255, 0), -1, 8);
-	}
+	DrawingUtilities::drawPointsOnto(localFrame, filteredKpts);
 	try {
-		cv::Mat H = cv::findHomography(filteredPrevKpts, filteredKpts);
 		cv::Mat vectors = MatechUtilities::pointsToHomogeneousMatrix(cornerPoints);
 		cv::Mat res = H * vectors;
 		cornerPoints = MatechUtilities::homogeneousMatrixToPoints(res);
-		cv::polylines(localFrame, cornerPoints, true, cv::Scalar(255, 255, 0));
+		//Displaying
+		DrawingUtilities::drawPolyShapeOnto(localFrame, cornerPoints);
 		cv::imshow("frame", localFrame);
+		// Updating
 		cv::swap(prevFrame, grayFrame);
-		prevKpts = filteredKpts;
+		std::swap(prevKpts, filteredKpts);
 	}
 	catch (const std::exception &exc) {
 		std::cout << exc.what() << std::endl;
 		return false;
 	}
-	if (cv::waitKey(30) >= 0)
+	if (MatechUtilities::isButtonPushed())
 	{
 		return false;
 	}
