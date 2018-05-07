@@ -1,7 +1,7 @@
 # Computer vision
-In this repository you can find notebooks of applications of computervision algorithum using python and OpenCV.
+In this repository you can find notebooks of applications of computer vision algorithums using python or C++ with OpenCV.
 ## Tracking
-[tracking.ipynb](tracking.ipynb) implements a histogramm based approach with CAMSHIFT. 
+[tracking.ipynb](python/tracking.ipynb) implements a histogramm based approach with CAMSHIFT. 
 1. First we select a patch of the image. 
 2. Use one or more changells to creat a histogramm: Check each color and put in the appropriate bin.
 3. Store the histogramm.
@@ -13,5 +13,7 @@ In this repository you can find notebooks of applications of computervision algo
  
 [Results](https://www.youtube.com/playlist?list=PLrQlWh70z5dLRcFmsxvW5DjShTdsIha3-)
 ### OpticFlow
-[TrackingObjectFlow.py](python/TrackingObjectFlow.py) Uses feature matching and optic flow.
+[tracking_with_homography C++ project](cpp/tracking_with_homography/tracking_with_homography/main.cpp) Findes keypoints in the selected region and tracks them with optic flow. Based on the motion of the points computes a homography and transforms the tracking window. However the computation of the homography has an unkown problem. The window is shifted to the upper left corner.
+[TrackingObjectFlow.py](python/TrackingObjectFlow.py) Its a tweaked version of the above in python. It adds feature matching and resets the tracking window, if match is possible.
 [Result](https://youtu.be/JtQz6ESbI6M)
+
