@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], kargs: Dict) -> None:
+def show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], **kargs: Dict) -> None:
     for i in range(plot_column_size * plot_row_size):
         plt.subplot(plot_row_size, plot_column_size, i + 1)
         img = imgs[i]
@@ -16,7 +16,7 @@ def show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], k
     plt.show()
 
 
-def cv_show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], kargs: Dict) -> None:
+def cv_show_pics(plot_column_size: int, plot_row_size: int, imgs: List[np.array], **kargs: Dict) -> None:
     cv_imgs = []
     for img in imgs:
         cv_imgs.append(cv.cvtColor(img.copy(), cv.COLOR_BGR2RGB))
@@ -116,8 +116,8 @@ def match_features(f1: List, f2: List) -> List:
 
 def find_homography(pts1, pts2, matches):
     m_pts1, m_pts2 = match_points(matches, pts1, pts2)
-    h, _ = cv.findHomography(m_pts1, m_pts2, cv.RANSAC, 5.0)
-    return h
+    h, m = cv.findHomography(m_pts1, m_pts2, cv.RANSAC, 5.0)
+    return h, m
 
 
 def match_points(matches, pts1, pts2):

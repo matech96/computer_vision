@@ -36,7 +36,7 @@ class TrackingFeature:
         matches = mu.match_features(self.org_feat, feat)
         print(len(matches))
         if len(matches) > self.MIN_MATCH_COUNT:
-            h = mu.find_homography([p.pt for p in self.org_pts], [p.pt for p in pts], matches)
+            h, _ = mu.find_homography([p.pt for p in self.org_pts], [p.pt for p in pts], matches)
             if h is not None:
                 cs = mu.transform_with_homography(h, self.org_box)
                 res, center = mu.draw_box_homogeneous(cs, frame, True)

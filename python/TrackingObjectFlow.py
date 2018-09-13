@@ -16,9 +16,9 @@ class TrackingObjectFlow:
         # Optic flow
         frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         prev_pts = np.array([p.pt for p in self.prev_kpts], dtype=np.float32).reshape((-1, 1, 2))
-        pts, st, err = cv.calcOpticalFlowPyrLK(self.prev_gray, frame_gray, prev_pts, None)
+        opts, st, err = cv.calcOpticalFlowPyrLK(self.prev_gray, frame_gray, prev_pts, None)
         condition = st == 1
-        pts = pts[condition]
+        pts = opts[condition]
         prev_pts = prev_pts[condition]
 
         kpts = mu.points_to_keypoints(pts, self.prev_kpts)
@@ -28,22 +28,24 @@ class TrackingObjectFlow:
         matches = mu.match_features(self.org_feat, feat)
         box = None
         if len(matches) > 20:
-            h = mu.find_homography(self.org_pts, pts, matches)
+            h, m = mu.find_homography(self.org_pts, pts, matches)
             if h is not None:
                 box = mu.transform_with_homography(h, self.org_box)
 
         if box is None:
-            h, _ = cv.findHomography(prev_pts, pts, cv.RANSAC, 5.0)
+            h, m = cv.findHomography(prev_pts, pts, cv.RANSAC, 3.0)
             if h is not None:
                 box = mu.transform_with_homography(h, self.prev_box)
 
         if box is not None:
-            res, box_center = mu.draw_box_homogeneous(box, frame, True)
+            res = self.print_points(frame, opts.reshape((-1, 2)), condition)
+            res = self.print_points(res, pts, m)
+            # box = self.recenter_box(box, pts, m)
+            res, box_center = mu.draw_box_homogeneous(box, res, True)
             self.prev_box = box
         else:
             res = frame
 
-        res = mu.draw_points([p.pt for p in kpts], res)
         if self.record:
             self.out.write(res)
         cv.imshow('frame', res)
@@ -56,6 +58,38 @@ class TrackingObjectFlow:
             return False
         else:
             return True
+
+    def recenter_box(self, box, pts, m):
+        a = []
+        for p, g in zip(pts, m):
+            if g == 1:
+                a.append(p)
+        cx = 0
+        cy = 0
+        for p in a:
+            cx += p[0]
+            cy += p[1]
+        cx /= len(a)
+        cy /= len(a)
+        print(cx, cy)
+        r = np.mean(box, axis=0)
+        ocx = r[0]
+        ocy = r[1]
+        box[:, :2] -= int(ocx - cx)
+        box[:, :2] -= int(ocy - cy)
+        return box
+
+    def print_points(self, res, pts, m):
+        gp = []
+        bp = []
+        for p, g in zip(pts, m):
+            if g == 1:
+                gp.append(p)
+            else:
+                bp.append(p)
+        res = mu.draw_points(gp, res)
+        res = mu.draw_points(bp, res, (125, 125, 125))
+        return res
 
     def run_loops_webcam(self):
         cam = TrackingFromVideo(self.__startup_webcam, self.__loop)
@@ -111,4 +145,4 @@ class TrackingObjectFlow:
 
 with TrackingObjectFlow() as t:
     # t.run_loops_webcam()
-    t.run_loops_file("../images/german.mp4", (100, 400, 900, 250))
+    t.run_loops_file("images/ger2.mp4", (230, 270, 920, 180))
